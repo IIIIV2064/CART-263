@@ -14,6 +14,7 @@ let earth, mapTexture; //obj related to earth
 let explosions = []; //array of explosions
 
 let exoSFX, exoVFX, explosionDetector; // obj related to explosions
+
 let maxCasualty = 10_000_000;
 let minCasualty = 100_000_000;
 let totalCasualty = 0; // for display purpose
@@ -47,7 +48,7 @@ function setup() { //setup the canvas and the js objects
 //State Manager//
 
 function draw() {
-        background(0) //set background color
+      background(0) //set background color
 
        if( state === 'main' ){ 
           mainScreen();
@@ -57,43 +58,51 @@ function draw() {
           endScreen();
        };
 
+
+
+      //console.log(explosionCount);
+      console.log(volume);
+      //console.log(exoVFX.size);
 }
 //States//
 
 function mainScreen(){ //main screen
+      push();
         textAlign(CENTER);
         fill(250);
         textSize(20);
         textFont(foont);
         text('click to see earth',0,0);
+      pop();
 
 };
 
 function simScreen(){ //simulation screen
 
+
       earth.spin(); //execute spin function first
       earth.display(); //show globe and update motion
 
-      audioTrigger();
+      audioTrigger(); //audio detector for auto bomb
+      casualtyCheck(); //prorgess tracker
 
-      textAlign(CENTER);
+      textAlign(CENTER); // display casualty UO
       fill(250);
       textSize(20);
       textFont(foont);
       text('casualties: '+totalCasualty.toLocaleString(),400,200);
 
-      for(let i=0; i < 100; i++){ //create more explosions 
-          if(exoVFX.boom == true){
-              exoVFX.bombAnimation(explosions[i]);
-              exoVFX.bombVisual(explosions[i]);
+      for (let i = explosions.length - 1; i >= 0; i--) {
+            let explosion = explosions[i];
+                
+            if (explosion.boom) {
+                  explosion.bombAnimation();
+                  explosion.bombVisual();
+            } else {
+                  explosions.splice(i, 1);
             }
       }
 
-      //console.log('bomb:'+explosionCount);
-
-      if(totalCasualty>= 1_000_000_000){ //detect when to end earth
-            state = "end"; 
-      }
 };
 
 function endScreen(){ //end screen
@@ -103,7 +112,7 @@ function endScreen(){ //end screen
         fill(200);
         textFont(foont);
         textSize(20);
-        text('now, its gone',0,0);
+        text('now its gone',0,0);
 };
 
 //Mechanical Functions//
@@ -115,45 +124,42 @@ function bombDropping(){ //setting the explosion in motion
 
       exoVFX.boom=true;
 
-
       let bombCasualty = Math.floor(Math.random() * (maxCasualty - minCasualty + 1)) + minCasualty; //generate a random number of casualty per bomb
       totalCasualty += bombCasualty; //add said random number to the total
       explosionCount += 1; //add 1 bomb count for log purpose
 };
 
-const debouncedBombDropping = debounce(bombDropping, 200); //buffer explosions within 200ms
+const debouncedBombDropping = debounce(bombDropping, 200); //buffer explosions within a time period
 
 function audioTrigger(){
-      //triggers random explosions when pass a certain treshhold
-      //also makes the lines 'vibrate'
-
-      explosionDetector.setInput(bgm);
-
+      explosionDetector.setInput(bgm); // makes the earth 'vibrate'
       level = explosionDetector.getLevel();
       volume = map(level,0.001,0.2,1,10,true);
 
-      if(volume >= 3.5){
-            debouncedBombDropping() 
-
+      if(volume >= 3.5){ //triggers random explosions when pass a certain treshhold
+            bombDropping();
             earth.strokeColor.r = 250; // change earth color to red
             earth.strokeColor.b = 0;
-
-            exoVFX.color.r = 255;
-            exoVFX.color.g = 255;
-            exoVFX.color.b = 255;
-
-      } 
-/*       if(volume < 3){
+      }else if(volume <=3.5){
             earth.strokeColor.r = 0;
             earth.strokeColor.b = 250;
-      } */
-      console.log(volume)
+      }
+
+};
+
+function casualtyCheck(){
+
+      if(totalCasualty>= 8_000_000_000){ //detect when to end earth
+            state = "end"; 
+      }
 };
 
 function resetWorld(){ //reset when the simulation ends
-      state ='main';
       totalCasualty = 0;
-      explosionCount = 0; // resert destructions
+      explosionCount = 0; 
+      volume = 0;
+
+      state ='main';
 };
 
 //User Inputs//
@@ -188,3 +194,4 @@ function mouseReleased(){
 function mouseWheel(event){
       scale = scale - (event.delta/1000)
 };
+

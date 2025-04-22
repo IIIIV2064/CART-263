@@ -4,7 +4,7 @@ class Globe{
 
 constructor(){ //base values for the globe
 
-      this.sphereSize = 300; //inital size
+      this.sphereSize = 250; //inital size
 
       this.strokeThick;
       this.strokeColor = {
@@ -14,7 +14,6 @@ constructor(){ //base values for the globe
       };
 
       this.scaledSize;
-      this.animationRate = 5;
       this.rotationRate = 0.005;
 
       this.mX ={
@@ -38,7 +37,7 @@ constructor(){ //base values for the globe
 display(){
 
       this.scaledSize = this.sphereSize*constrain(scale,0.1,2);
-      this.strokeThick = map(volume,1,6,0.5,5,true);
+      this.strokeThick = map(volume,1,6,0.5,3,true);
 
       rotateY(this.mX.rotation); //make it spin!
       rotateX(this.mY.rotation);

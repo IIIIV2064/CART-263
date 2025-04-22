@@ -7,7 +7,8 @@ class VFX extends Globe{
         super();
 
         this.size = 0;
-        this.maxSize = random(50,100);
+        this.maxSize = random(75,100);
+        this.animatingRate = 5;
 
         this.color ={
           r:250,
@@ -16,7 +17,6 @@ class VFX extends Globe{
         }
 
         this.boom = true;
-        console
     }
 
     resetPosition(){//randomized position at the surface of the globe
@@ -31,23 +31,23 @@ class VFX extends Globe{
     }
 
     bombVisual(){
-
         push();
             stroke(this.color.r,this.color.g,this.color.b);
-            noFill();
+            fill(255,100,0);
             translate(this.x, this.y, this.z);
             sphere(this.size);
         pop();
     }
 
     bombAnimation(){
-
-        if( this.size < this.maxSize && this.size >= 0) {
-            this.size = this.size + this.animationRate;
-        }else{
-            this.size = 0;
-            this.boom = false;
-        }
+        push();
+            if( this.size < this.maxSize && this.size >= 0) {
+                this.size += this.animatingRate;
+            }else{
+                this.size = 0;
+                this.boom = false;
+            }
+        pop();
     }
 
 }
